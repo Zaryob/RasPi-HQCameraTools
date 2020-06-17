@@ -8,6 +8,9 @@ import logging
 import socketserver
 from threading import Condition
 from http import server
+import socket
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
 
 PAGE="""\
 <html>
@@ -80,6 +83,10 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
 class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     allow_reuse_address = True
     daemon_threads = True
+
+print("Starting WebOut on your Raspberry Pi")
+print("Your Computer Name is:" + hostname)
+print("Your Computer IP Address is:" + IPAddr)
 
 with picamera.PiCamera(resolution='640x480', framerate=24) as camera:
     output = StreamingOutput()
