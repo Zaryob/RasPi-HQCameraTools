@@ -9,8 +9,8 @@ import socketserver
 from threading import Condition
 from http import server
 import socket
-hostname = socket.gethostname()
-IPAddr = socket.gethostbyname(hostname)
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
 
 PAGE="""\
 <html>
@@ -84,17 +84,26 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     allow_reuse_address = True
     daemon_threads = True
 
-print("Starting WebOut on your Raspberry Pi")
-print("Your Computer Name is:" + hostname)
-print("Your Computer IP Address is:" + IPAddr)
 
-with picamera.PiCamera(resolution='640x480', framerate=24) as camera:
+port=8000
+resolution="640x480"
+framerate=24
+rotation=0
+
+print("Starting WebOut on your Raspberry Pi")
+print("Your Computer IP Address is: {}".format(s.getsockname()[0]))
+print("Other Settings: (That you can change)")
+print("-> Port: {}".format(port))
+print("Printout Format= \n\tResolution={}\n\tFramerate={}\n\tRotation={}".format(resolution,framerate,rotation))
+
+with picamera.PiCamera(resolution=resolution, framerate=framerate) as camera:
     output = StreamingOutput()
+    camera.rotation=rotation
     #Uncomment the next line to change your Pi's Camera rotation (in degrees)
     #camera.rotation = 90
     camera.start_recording(output, format='mjpeg')
     try:
-        address = ('', 8000)
+        address = ('', port)
         server = StreamingServer(address, StreamingHandler)
         server.serve_forever()
     finally:
